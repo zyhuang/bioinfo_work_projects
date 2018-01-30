@@ -20,3 +20,10 @@ The last variant is a large-scale deletion, but the reference allele is represen
 
 
 
+snippet copied from
+/stornext/snfs4/1000-gen/zhuoyih/cafgen/vcf/varlist
+
+
+make_union_varkey.py
+fasta.py
+bed.py
