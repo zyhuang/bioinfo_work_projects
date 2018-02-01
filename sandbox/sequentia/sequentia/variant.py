@@ -25,14 +25,13 @@ Annovar data format has two forms:
     hg19_gnomad_exome.txt
     hg19_gnomad_genome.txt
 
+
 TODO:
 
-    add fasta reference base query
 '''
 
 import sys
 import re
-# from . import fasta
 
 
 class Variant:
@@ -154,7 +153,7 @@ class Variant:
             return 'MNV'
 
 
-    def parse(self, chrom, pos, ref, alt, left_norm=False):
+    def parse(self, chrom, pos, ref, alt, refgen_fa, left_norm=False):
         '''parse variant given chrom, pos, ref, alt.
 
         Args:
@@ -162,6 +161,7 @@ class Variant:
             pos:  1-based position in the reference
             ref:  reference allele (can be -, [ACGT]+)
             alt:  alternate allele (can be -, [ACGT]+, [0-9]+, [0-9]+[ACGT]+)
+            refgen_fa:  Fasta object, see Fasta module
 
         Attributes:
             member data: chrom, pos, ref, alt are updated
@@ -217,16 +217,18 @@ class Variant:
 
         # Indel and MNV
         if ref == '-' and alt != '-':
-            # insertion
+            # insertion, e.g.  -:ACG => R:RACG
             self.pos = pos
-            self.ref = 'R'
-            self.alt = 'R' + alt
+            self.ref = refgen_fa.query(self.chrom, pstart=self.pos,
+                                       pend=self.pos)
+            self.alt = self.ref + alt
 
         elif alt == '-' and ref != '-':
-            # deletion
+            # deletion, e.g. ACG:- => RACG:R
             self.pos = pos - 1
-            self.ref = 'R' + ref
-            self.alt = 'R'
+            self.alt = refgen_fa.query(self.chrom, pstart=self.pos,
+                                       pend=self.pos)
+            self.ref = self.alt + ref
 
         elif alt[0] in "ACGT":
             # [ACGT]+ indel or MNV
@@ -235,10 +237,11 @@ class Variant:
             self.alt = alt
 
         elif alt[-1].isdigit():
-            # [0-9]+, alt is a number, =deletion, e.g. 1 255403 AGGG 4
+            # [0-9]+, alt is a number, =deletion, e.g. AGGG:4 => RAGGG:R
             self.pos = pos - 1
-            self.ref = 'R' + ref
-            self.alt = 'R'
+            self.alt = refgen_fa.query(self.chrom, pstart=self.pos,
+                                       pend=self.pos)
+            self.ref = self.alt + ref
 
         elif alt[0].isdigit() and alt[-1] in "ACGT":
             # [0-9]+[ACGT]+, indel or MNV
