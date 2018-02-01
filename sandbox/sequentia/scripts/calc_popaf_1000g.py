@@ -1,5 +1,15 @@
+'''This module calculate AF in each population of 1000G in a given input VCF.
+
+'''
 import sys
+
+sys.path.append('/home/zyhuang/git2/bioinfo_work_projects/sandbox/sequentia/sequentia')
+
+import variant
+import fasta
 from subprocess import PIPE, Popen
+import json
+
 
 
 def load_sample_pop(panel_name):
@@ -24,18 +34,6 @@ def load_sample_header(vcf_line, panel_name):
             continue
         sample_header_hash[i] = sample_pop_hash[s]
     return sample_header_hash
-
-
-def has_snp(ref, alt_list):
-
-    if len(ref) > 1:
-        return False
-
-    for alt in alt_list:
-        if len(alt) == 1:
-            return True
-
-    return False
 
 
 def load_gt_stat(vcf_data, sample_header_hash):
@@ -90,11 +88,27 @@ def parse_info_af(vcf_data):
 
 
 
-def subpop_af(vcf_name, panel_name):
+def subpop_af(vcf_name, panel_name, refgen_name, out_list_name,
+              region_str=None):
+    '''
+
+    Note: about RsID.
+    '''
+
+    refgen_fa = fasta.Fasta(refgen_name)
+    fout = open(out_list_name, 'w')
+
+    if region_str:
+        cmd = 'tabix -h {} {}'.format(vcf_name, region_str)
+    else:
+        cmd = 'zcat {}'.format(vcf_name)
+
+    proc = Popen(cmd, shell=True, stdout=PIPE, universal_newlines=True)
+
+    print('> ' + cmd, file=sys.stderr)
+    print('writing ' + out_list_name, file=sys.stderr)
 
     sample_header_hash = {}
-    proc = Popen('zcat {}'.format(vcf_name), shell=True, stdout=PIPE,
-                 universal_newlines=True)
     for line in proc.stdout:
         if line.startswith('##'):
             continue
@@ -103,45 +117,81 @@ def subpop_af(vcf_name, panel_name):
             continue
 
         vcf_data = line.rstrip().split('\t')
-        chrom, pos, rsid, ref, alts = vcf_data[:5]
+
+        chrom, pos, rsids, ref, alts = vcf_data[:5]
         alt_list = alts.split(',')
+        rsid_list = rsids.split(';')
+        if len(alt_list) != len(rsid_list):
+            rsid_list = [rsids for alt in alt_list]
 
-        # skip non-SNP
-        if not has_snp(ref, alt_list):
-            continue
 
-        # load stats of GT by populations
-        gt_stat = load_gt_stat(vcf_data, sample_header_hash)
+        # ----- debug -----
+        # if not vcf_data[4].startswith('<'):
+        #     continue
+        # if len(alt_list) == 1:
+        #     continue
 
-        # load info data
+        # for validation only
         info_af = parse_info_af(vcf_data)
 
-
+        # loop through multiallelic variants
+        gt_stat = None
         for i, alt in enumerate(alt_list):
-            if len(alt) == 1:
-                varkey = '{}:{}:{}:{}'.format(chrom, pos.zfill(9), ref, alt)
-                af_stat = calc_alt_freq(gt_stat, i)
-                # checking
-                for p in ['AFR', 'AMR', 'EUR', 'EAS', 'SAS', 'ALL']:
-                    q = p+'_AF' if p != 'ALL' else 'AF'
-                    if abs(af_stat[p] - info_af[q][i]) > 1e-3:
-                        print(vcf_data[:8])
-                        print(p, q, af_stat[p], info_af[q][i])
-                        print(varkey)
-                        print(af_stat)
-                        print(gt_stat)
-                        print()
+            var = variant.Variant()
+            try:
+                var.parse(chrom, pos, ref, alt, refgen_fa, left_norm=True)
+            except ValueError as e:
+                print('*WARNING* ' + str(e), file=sys.stderr)
+                continue
+            if var.var_type() != 'SNV':
+                continue
 
+            varkey = str(var)
+            if not gt_stat:
+                gt_stat = load_gt_stat(vcf_data, sample_header_hash)
+            af_stat = calc_alt_freq(gt_stat, i)
+            print(varkey, rsid_list[i], json.dumps(af_stat, sort_keys=True),
+                  sep='\t', file=fout)
 
+            # ----- debug -----
+            # print(vcf_data[:8])
+            # print(varkey)
+            # print(af_stat)
+            # print(gt_stat)
+            # print()
+
+            for p in ['AFR', 'AMR', 'EUR', 'EAS', 'SAS', 'ALL']:
+                q = p+'_AF' if p != 'ALL' else 'AF'
+                if abs(af_stat[p] - info_af[q][i]) > 1e-3:
+                    print(vcf_data[:8], file=sys.stderr)
+                    print(p, q, af_stat[p], info_af[q][i], file=sys.stderr)
+                    print(varkey, file=sys.stderr)
+                    print(af_stat, file=sys.stderr)
+                    print(gt_stat, file=sys.stderr)
+                    print(file=sys.stderr)
 
     proc.communicate()
+    fout.close()
 
 
 def test():
 
     subpop_af(
         'test/ALL.chr20.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz',
-        'test/integrated_call_samples_v3.20130502.ALL.panel')
+        'test/integrated_call_samples_v3.20130502.ALL.panel',
+        '/data1/work/niptcaller/bundle/refgen/bwa/human.g1k.v37.fa',
+        'test.list', region_str='20:1000000-2000000')
+
+# test()
 
 
-test()
+if __name__ == '__main__':
+
+    vcf_name, panel_name, refgen_name, out_list_name = sys.argv[1:5]
+    if len(sys.argv) == 6:
+        region_str = sys.argv[5]
+    else:
+        region_str = None
+
+    subpop_af(vcf_name, panel_name, refgen_name, out_list_name,
+              region_str=region_str)
