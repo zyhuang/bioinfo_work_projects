@@ -1,5 +1,9 @@
 '''This module deals with reference fasta file.
 
+
+TODO:
+- remove testing part
+- add command line query interface
 '''
 
 class Fasta:
@@ -176,7 +180,7 @@ if __name__ == '__main__':
         chrom = random.choice(chrom_set)
         chrom = '2'
         pstart = random.randrange(1,100000000)
-        pend = pstart + random.randrange(1,100000)
+        pend = pstart + random.randrange(1,1000)
         region = '{}:{}-{}'.format(chrom, pstart, pend)
         if (i+1) % 10 == 0:
             print('> tested {} cases'.format(i+1), flush=True)
