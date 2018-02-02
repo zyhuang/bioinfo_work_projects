@@ -60,16 +60,24 @@ def calc_alt_freq(gt_stat, alt_index):
 
     af_stat = {}
     for pop,gt_dict in gt_stat.items():
-        ns = 0
+        an = 0
         ac = 0
         for gt,count in gt_dict.items():
-            ns += count
-            if gt == '{}|{}'.format(alt_index+1, alt_index+1):
-                ac += 2*count
-            elif (gt.startswith('{}|'.format(alt_index+1)) or
-                  gt.endswith('|{}'.format(alt_index+1))):
-                ac += count
-        af_stat[pop] = ac/ns/2
+            if '|' in gt:
+                # diploid
+                an += count*2
+                if gt == '{}|{}'.format(alt_index+1, alt_index+1):
+                    ac += count*2
+                elif (gt.startswith('{}|'.format(alt_index+1)) or
+                      gt.endswith('|{}'.format(alt_index+1))):
+                    ac += count
+            else:
+                 # haploid (male)
+                 an += count
+                 if gt == '{}'.format(alt_index+1):
+                     ac += count
+
+        af_stat[pop] = ac/an
 
     return af_stat
 
