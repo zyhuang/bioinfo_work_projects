@@ -2,8 +2,9 @@
 
 '''
 import sys
-
-sys.path.append('/home/zyhuang/git2/bioinfo_work_projects/sandbox/sequentia/sequentia')
+from os.path import dirname, abspath
+root_dir = dirname(dirname(abspath(__file__)))
+sys.path.append('{}/sequentia'.format(root_dir))
 
 import variant
 import fasta
