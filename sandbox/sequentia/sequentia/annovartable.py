@@ -5,7 +5,7 @@ import sys
 
 class AnnovarTable:
 
-    def __init__(self, table_name):
+    def __init__(self, table_name, query_chrom=None):
         '''Create a table object.'''
 
         self.table_name = table_name
@@ -13,10 +13,17 @@ class AnnovarTable:
         self.index = {}
         self.bin_size = 0
         self.file_size = 0
-        self.load_index()
+        self.load_index(query_chrom)
 
 
-    def load_index(self):
+    def close(self):
+        '''Free loaded index file.'''
+        self.index = {}
+        self.bin_size = 0
+        self.file_size = 0
+
+
+    def load_index(self, query_chrom):
         '''Load table index (.idx file)
 
         Set Attributes:
@@ -38,6 +45,8 @@ class AnnovarTable:
                 self.file_size = int(filesize)
                 continue
             chrom, pos, bstart, bend = line.rstrip().split('\t')
+            if query_chrom and chrom != query_chrom:
+                continue
             pos = int(pos)
             if chrom not in self.index:
                 self.index[chrom] = {}
