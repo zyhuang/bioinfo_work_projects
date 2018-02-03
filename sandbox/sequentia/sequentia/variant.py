@@ -272,3 +272,17 @@ class Variant:
 
         if left_norm:
             self.left_normalize()
+
+
+def sort_varkey(varkey):
+
+    chrom_hash = {'X':23, 'Y':24, 'MT':25}
+
+    chrom, pos, ref, alt = varkey.split(':')
+    if chrom in chrom_hash:
+        chrom = chrom_hash[chrom]
+    else:
+        chrom = int(chrom)
+    pos = int(pos)
+
+    return chrom, pos, ref, alt
