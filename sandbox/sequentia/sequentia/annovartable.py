@@ -13,6 +13,8 @@ class AnnovarTable:
         self.index = {}
         self.bin_size = 0
         self.file_size = 0
+        self.header = []
+        self.load_header()
         self.load_index(query_chrom)
 
 
@@ -21,7 +23,15 @@ class AnnovarTable:
         self.index = {}
         self.bin_size = 0
         self.file_size = 0
+        self.header = []
 
+
+    def load_header(self):
+
+        with open(self.table_name) as f:
+            line = f.readline().rstrip()
+            if line.startswith('#'):
+                self.header = line.split('\t')
 
     def load_index(self, query_chrom):
         '''Load table index (.idx file)
