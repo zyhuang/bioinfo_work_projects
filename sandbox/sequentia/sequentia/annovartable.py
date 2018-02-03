@@ -1,6 +1,7 @@
 '''This module deals with query of annovar table.
 
 '''
+import sys
 
 class AnnovarTable:
 
@@ -20,7 +21,10 @@ class AnnovarTable:
 
         Set Attributes:
             self.index (dict):  stores offset in byte of each bin position
-                {chrom: {pos: {offset: offset, nbyte: nbyte}}}
+                {chrom: {pos: {offset_start: offset, offset_end: offset}}}
+                offset_start is 0-based inclusive (used by seek())
+                offset_end is 0-based non-inclusive
+                (used in nbyte = offset_end - offset_start)
             self.binsize (int):  number of bases per bin
             self.filesize (int):  total number of bytes in the table file
         '''
@@ -37,8 +41,8 @@ class AnnovarTable:
             if chrom not in self.index:
                 self.index[chrom] = {}
             self.index[chrom][pos] = {
-                'offset': int(bstart),
-                'nbyte': int(bend) - int(bstart)
+                'offset_start': int(bstart),
+                'offset_end': int(bend),
             }
 
 
@@ -49,10 +53,7 @@ class AnnovarTable:
             region (str):  region of format chrom(:pstart-pend)
 
         Returns:
-            iterator
-
-        Raises:
-            ValueError  if input range is invalid
+           generator of lines overlapping with query region.
         '''
 
         if ':' not in region:
@@ -71,10 +72,7 @@ class AnnovarTable:
             pend (int): ending position of query region (1-based inclusive)
 
         Returns:
-           iterator of lines overlapping with query region.
-
-        Raises:
-            ValueError  if input range is invalid
+           generator of lines overlapping with query region.
         '''
 
         if chrom == None:
@@ -83,22 +81,31 @@ class AnnovarTable:
                     yield line.rstrip()
             return
 
-        chrom_len = sort(self.index[chrom])[-1] + self.bin_size
+        chrom_len = sorted(self.index[chrom])[-1] + self.bin_size - 1
 
         if chrom not in self.index:
-            raise ValueError('query chromosome {} is not found'.format(chrom))
+            print('*WARNING* query chromosome {} is not found'.format(chrom),
+                  file=sys.stderr)
+            yield from []
+            return
 
         if pstart and pstart > chrom_len:
-            raise ValueError('query region outside of chromosome {}:{}-'
-                             .format(chrom, pstart))
+            print('*WARNING* query region outside of chromosome {}:{}-'
+                  .format(chrom, pstart), file=sys.stderr)
+            yield from []
+            return
 
         if pend and pend < 1:
-            raise ValueError('query region outside of chromosome {}:-{}'
-                             .format(chrom, pend))
+            print('*WARNING* query region outside of chromosome {}:-{}'
+                  .format(chrom, pend), file=sys.stderr)
+            yield from []
+            return
 
         if pstart and pend and pstart > pend:
-            raise ValueError('query region is illegal {}:{}-{}'
-                             .format(chrom, pstart, pend))
+            print('*WARNING* query region is illegal {}:{}-{}'
+                  .format(chrom, pstart, pend), file=sys.stderr)
+            yield from []
+            return
 
         # set default start/end position if not specified
         if not pstart or pstart < 1:
@@ -107,3 +114,76 @@ class AnnovarTable:
             pend = chrom_len
 
         # find overlapping bins
+        bin_start = self._find_bin(chrom, pstart, forward=True)
+        bin_end = self._find_bin(chrom, pend, forward=False)
+
+        # specified query range is either before the first bin or after the last bin
+        if bin_start == None or bin_end == None:
+            yield from []
+            return
+
+        offset_start = self.index[chrom][bin_start]['offset_start']
+        offset_end = self.index[chrom][bin_end]['offset_end']
+
+        with open(self.table_name) as f:
+            f.seek(offset_start)
+            data = f.read(offset_end-offset_start).split('\n')
+            data.pop()
+            for line in data:
+                lpos = int(line.split('\t')[1])
+                if lpos >= pstart and lpos <= pend:
+                    yield line
+
+        return
+
+
+    def _find_bin(self, chrom, pos, forward=True):
+        '''Find the bin position of query position.
+
+        Example:
+        1..99 => 0, 100..199 => 100, 200..299 => 200
+
+        if bin is not found, then find the next existing bin
+        (diretion='forward') or prvious existing bin (direction='backward')
+
+        if next existing bin is after the last bin, return None
+        if previous existing bin is before the before bin, return None
+        '''
+
+        pos_floor = pos // self.bin_size * self.bin_size
+        if pos_floor in self.index[chrom]:
+            return pos_floor
+
+        bin_list = sorted(self.index[chrom])
+
+        if forward:
+            if pos_floor > bin_list[-1]:
+                return None
+            for bin_pos in range(pos_floor, bin_list[-1]+1, self.bin_size):
+                if bin_pos in self.index[chrom]:
+                    return bin_pos
+
+        else:  # backward
+            if pos_floor < bin_list[0]:
+                return None
+            for bin_pos in range(pos_floor, bin_list[0]-1, -self.bin_size):
+                if bin_pos in self.index[chrom]:
+                    return bin_pos
+
+def test():
+
+    table_name = '../scripts/humandb/hg19_esp6500siv2_aa.txt'
+    table = AnnovarTable(table_name)
+#    for line in table.query(chrom='X', pstart=154001557, pend=154001557+100000):
+    for line in table.query(chrom='X', pstart=155239822, pend=155239900):
+    # for line in table.query(chrom='X', pstart=155239899):
+    # for line in table.query():
+        print(line)
+
+
+if __name__ == '__main__':
+
+    table_name, region_str = sys.argv[1:3]
+    table = AnnovarTable(table_name)
+    for line in table.query_region(region_str):
+        print(line)
