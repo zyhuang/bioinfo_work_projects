@@ -152,8 +152,8 @@ def subpop_af(vcf_name, panel_name, refgen_name, out_list_name,
             except ValueError as e:
                 print('*WARNING* ' + str(e), file=sys.stderr)
                 continue
-            if var.var_type() != 'SNV':
-                continue
+            # if var.var_type() != 'SNV':
+            #     continue
 
             varkey = str(var)
             if not gt_stat:
