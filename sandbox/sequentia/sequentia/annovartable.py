@@ -30,6 +30,7 @@ class AnnovarTable:
         '''
 
         self.index = {}
+        print('loading ' + self.table_index_name, file=sys.stderr)
         for line in open(self.table_index_name):
             if line.startswith('#'):
                 foo, binsize, filesize = line.rstrip().split('\t')
@@ -46,7 +47,7 @@ class AnnovarTable:
             }
 
 
-    def query_region(self, region):
+    def query_region(self, region=None):
         '''Query annovar table by a region string
 
         Args:
@@ -56,11 +57,15 @@ class AnnovarTable:
            generator of lines overlapping with query region.
         '''
 
+        if region == None:
+            return self.query()
+
         if ':' not in region:
-            return self.query(chrom)
+            return self.query(chrom=region)
+
         chrom, prange = region.split(':')
         pstart, pend = map(int, prange.split('-'))
-        return self.query(chrom, pstart, pend)
+        return self.query(chrom=chrom, pstart=pstart, pend=pend)
 
 
     def query(self, chrom=None, pstart=None, pend=None):
