@@ -1,0 +1,41 @@
+#!/bin/bash
+
+#PBS -q scavenger
+#PBS -A scavenger
+#PBS -o log
+#PBS -V
+#PBS -j oe
+#PBS -N stat_size
+#PBS -l nodes=1:ppn=1,mem=5G
+#PBS -t 1-25
+
+#-q analysis
+#-A proj-fy0006
+#-l walltime=13:00:00:00
+
+#
+cd $PBS_O_WORKDIR
+
+#PBS_ARRAYID=10
+
+t1=$(date +%s)
+
+incr=1
+istart=$[(PBS_ARRAYID-1)*incr+1]
+iend=$[PBS_ARRAYID*incr]
+
+outdir=/stornext/snfs2/1000GENOMES/zhuoyih/group/storage/out
+
+ts=$(date +%Y%m%d)
+for dir in $(cat dirs.list | awk 'NR>='$istart' && NR<='$iend''); do
+    fout=$outdir/$(echo $dir | sed 's|/stornext|stornext|g' | sed 's|/|_|g').$ts.log
+    echo "du -ch --max-depth=10 $dir > $fout"
+    du -ch --max-depth=10 $dir > $fout
+    echo "date >> $fout"
+    date >> $fout
+done
+
+
+t2=$(date +%s)
+dt=$[t2-t1]
+echo "% Job $PBS_ARRAYID is done in $(date -ud @$dt +%j:%T | awk -F\: '{printf("%03d:%02d:%02d:%02d\n",$1-1,$2,$3,$4)}')"
