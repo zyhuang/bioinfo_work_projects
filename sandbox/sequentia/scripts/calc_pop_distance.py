@@ -3,14 +3,18 @@ import sys
 import numpy as np
 
 
-def calc_pop_distance(pop1, pop2, maf_min=0.01):
+def calc_pop_distance(pop1, pop2, af_list_name, maf_min=0.001, nfile_max=-1):
 
     af1_list = []
     af2_list = []
 
-    for binkey in open('test.binkey.list'):
-        list_name = '../../af_list/{}.af.list'.format(binkey.rstrip())
+    nfile = 0
+    nvar = 0
+    for list_name in open(af_list_name):
+        list_name = list_name.rstrip()
+        # print('reading ' + list_name, file=sys.stderr)
 
+        nfile += 1
         for line in open(list_name):
             varkey, rsid, vardata = line.rstrip().split('\t')
             vardata = json.loads(vardata)
@@ -20,15 +24,20 @@ def calc_pop_distance(pop1, pop2, maf_min=0.01):
 
             af1_list.append(vardata[pop1])
             af2_list.append(vardata[pop2])
+            nvar += 1
 
-        break
-
+        if nfile == nfile_max:
+            break
 
     cov_matrix = np.cov(af1_list, af2_list)
 
-    print(pop1, pop2, cov_matrix[0][0], cov_matrix[1][1], cov_matrix[0][1],
-          cov_matrix[0][1]/np.sqrt(cov_matrix[0][0]*cov_matrix[1][1]))
+    print(pop1, pop2, nvar,
+          cov_matrix[0][0], cov_matrix[1][1], cov_matrix[0][1],
+          cov_matrix[0][1]/np.sqrt(cov_matrix[0][0]*cov_matrix[1][1]),
+          sep='\t')
 
 
-pop1, pop2 = sys.argv[1:3]
-calc_pop_distance(pop1, pop2)
+pop1, pop2, af_list_name, maf_min, nfile_max = sys.argv[1:6]
+maf_min = float(maf_min)
+nfile_max = int(nfile_max)
+calc_pop_distance(pop1, pop2, af_list_name, maf_min, nfile_max)
