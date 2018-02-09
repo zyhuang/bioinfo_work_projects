@@ -26,7 +26,7 @@ def proc_data(data_file_name, data_label_name):
     return data_matrix, data_label
 
 
-def plot_data(data_matrix, data_label):
+def plot_data(data_matrix, data_label, out_pdf_name):
 
     fig, ax = plt.subplots()
 
@@ -40,16 +40,17 @@ def plot_data(data_matrix, data_label):
     ax.set_yticklabels(data_label, minor=False)
     plt.xticks(rotation=90)
 
-    plt.show()
+    # plt.show()
+    plt.savefig(out_pdf_name)
 
 
 def plot_heat():
 
-    data_file_name, data_label_name = sys.argv[1:3]
+    data_file_name, data_label_name, out_pdf_name = sys.argv[1:4]
     # data_file_name = 'distance.list'
     # data_label_name = 'prov_order.list'
     data_matrix, data_label = proc_data(data_file_name, data_label_name)
-    plot_data(data_matrix, data_label)
+    plot_data(data_matrix, data_label, out_pdf_name)
 
 
 if __name__ == '__main__':
