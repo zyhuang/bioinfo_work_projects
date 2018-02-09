@@ -1,4 +1,5 @@
 import sys
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -28,6 +29,8 @@ def proc_data(data_file_name, data_label_name):
 
 def plot_data(data_matrix, data_label, out_pdf_name):
 
+    matplotlib.rcParams.update({'font.size': 7})
+
     fig, ax = plt.subplots()
 
     cplot = plt.imshow(data_matrix, cmap='Spectral_r',
@@ -41,7 +44,7 @@ def plot_data(data_matrix, data_label, out_pdf_name):
     plt.xticks(rotation=90)
 
     # plt.show()
-    plt.savefig(out_pdf_name)
+    plt.savefig(out_pdf_name, bbox_inches='tight')
 
 
 def plot_heat():
