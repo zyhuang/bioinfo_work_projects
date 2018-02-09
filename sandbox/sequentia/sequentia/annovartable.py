@@ -108,25 +108,25 @@ class AnnovarTable:
         chrom_len = sorted(self.index[chrom])[-1] + self.bin_size - 1
 
         if chrom not in self.index:
-            print('*WARNING* query chromosome {} is not found'.format(chrom),
-                  file=sys.stderr)
+            print('*WARNING* query chromosome {} is not found (abort)'
+                  .format(chrom), file=sys.stderr)
             yield from []
             return
 
         if pstart and pstart > chrom_len:
-            print('*WARNING* query region outside of chromosome {}:{}-'
-                  .format(chrom, pstart), file=sys.stderr)
+            print('*WARNING* query region outside of chromosome range of idx '
+                  '{}:{}- (abort)'.format(chrom, pstart), file=sys.stderr)
             yield from []
             return
 
         if pend and pend < 1:
-            print('*WARNING* query region outside of chromosome {}:-{}'
-                  .format(chrom, pend), file=sys.stderr)
+            print('*WARNING* query region outside of chromosome range of idx '
+                  '{}:-{} (abort)'.format(chrom, pend), file=sys.stderr)
             yield from []
             return
 
         if pstart and pend and pstart > pend:
-            print('*WARNING* query region is illegal {}:{}-{}'
+            print('*WARNING* query region is illegal {}:{}-{} (abort)'
                   .format(chrom, pstart, pend), file=sys.stderr)
             yield from []
             return
