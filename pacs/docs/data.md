@@ -45,7 +45,7 @@ This file documents the format of intermediate data in PACS.
 
 * data location: `data[234]/pacs/prov_af/[PROV]/af.b_[BID].sb_[SBID].out.gz` (Bin ID `BID` = `1..5733`, sub-bin ID `SBID` = `1..9`, `PROV` is the name of 34 provinces, including `All`, `Unknown` and `Korea`). 
 * data size: 15.6TB.
-* number of files: 51597 files per province (5733 bins, 9 sub-bins per bin). The number of variants per sub-bin is 500, except for the last bin `5733`.  
+* number of files: 51597 files per province (5733 bins, 9 sub-bins per bin). The number of variants per sub-bin is 500, except for the last bin (5733).  
 * content: Bayesian allele frequency estimation result, one file per sub-bin, one variant per line. 
 * column 1: variant key `chrom:pos:ref:alt` (`pos` is a 9-digit number with 0-prefix). 
 * column 2: variant features (in JSON format)
@@ -53,42 +53,42 @@ This file documents the format of intermediate data in PACS.
 ```javascript
 {
 	"af_pdf": {
-		"ci_mean_90%": list (2 int, 90% CI lower and upper bound around MLE)
-		"ci_mean_95%": list (2 int, 95% CI lower and upper bound around MLE)
-		"ci_mean_99%": list (2 int, 99% CI lower and upper bound around MLE)
-		"ci_mean_99.5%": list (2 int, 99.5% CI lower and upper bound around MLE)
-		"ci_mean_99.9%": list (2 int, 99.9% CI lower and upper bound around MLE)
-		"ci_mean_99.99%": list (2 int, 99.99% CI lower and upper bound around MLE)
-		"ci_mean_99.999%": list (2 int, 99.999% CI lower and upper bound around MLE)
+		"ci_mean_90%": list (2 int, 90% CI lower and upper bound around MLE),
+		"ci_mean_95%": list (2 int, 95% CI lower and upper bound around MLE),
+		"ci_mean_99%": list (2 int, 99% CI lower and upper bound around MLE),
+		"ci_mean_99.5%": list (2 int, 99.5% CI lower and upper bound around MLE),
+		"ci_mean_99.9%": list (2 int, 99.9% CI lower and upper bound around MLE),
+		"ci_mean_99.99%": list (2 int, 99.99% CI lower and upper bound around MLE),
+		"ci_mean_99.999%": list (2 int, 99.999% CI lower and upper bound around MLE),
 
-		"ci_mode_90%": list (2 int, 90% CI lower and upper bound around mode)
-		"ci_mode_95%": list (2 int, 95% CI lower and upper bound around mode)
-		"ci_mode_99%": list (2 int, 99% CI lower and upper bound around mode)
-		"ci_mode_99.5%": list (2 int, 99.5% CI lower and upper bound around mode)
-		"ci_mode_99.9%": list (2 int, 99.9% CI lower and upper bound around mode)
-		"ci_mode_99.99%": list (2 int, 99.99% CI lower and upper bound around mode)
-		"ci_mode_99.999%": list (2 int, 99.999% CI lower and upper bound around mode)
+		"ci_mode_90%": list (2 int, 90% CI lower and upper bound around mode),
+		"ci_mode_95%": list (2 int, 95% CI lower and upper bound around mode),
+		"ci_mode_99%": list (2 int, 99% CI lower and upper bound around mode),
+		"ci_mode_99.5%": list (2 int, 99.5% CI lower and upper bound around mode),
+		"ci_mode_99.9%": list (2 int, 99.9% CI lower and upper bound around mode),
+		"ci_mode_99.99%": list (2 int, 99.99% CI lower and upper bound around mode),
+		"ci_mode_99.999%": list (2 int, 99.999% CI lower and upper bound around mode),
 
 		"init": {
 			"af": float (0-1, initial value of AF),
 			"index": int (0-999, index in AF search list),
-			"prob": float (0-1)
-		}
+			"prob": float (0-1),
+		},
 		"mean": {
 			"af": float (0-1, MLE),
 			"index": int (0-999, index in AF search list),
-			"prob": float (0-1)
-		}
+			"prob": float (0-1),
+		},
 		"mean": {
 			"af": float (0-1, median),
 			"index": int (0-999, index in AF search list),
-			"prob": float (0-1)
-		}
+			"prob": float (0-1),
+		},
 		"mean": {
 			"af": float (0-1, mode),
 			"index": int (0-999, index in AF search list),
-			"prob": float (0-1)
-		}
+			"prob": float (0-1),
+		},
 		"pdf": [          # list of 1000 AF values and probabilities
 			[af, prob],   # [float, float] 
 			...
