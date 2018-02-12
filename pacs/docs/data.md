@@ -4,11 +4,11 @@ This files documents the format of intermediate data in PACS.
 
 * data location: `data2/pacs/var_json/batch_[BID]/[SID].var.json.gz`, (`BID` = `00..21`). 
 * number of files: `214277`.
-* content: Random Forest variant classification result, one file per sample, one variant per line (). 
+* content: Random Forest variant classification result, one file per sample, one variant per line. 
 * column 1: variant key, format = `chrom:pos:ref:alt` (`pos` is a 9-digit number with 0-prefix). 
 * column 2: variant features (in JSON format)
 
-```Javascript
+```json
 {
 	"anno": {
 		"af_1000g_all": float (0-1),
@@ -25,10 +25,10 @@ This files documents the format of intermediate data in PACS.
 	}
 	"read": {
 		"baseq_baq": list (11 int, 0-),
-		"baseq_cal": list (11 int, 0-40),
-		"baseq_raw": list (11 int, 0-40),
+		"baseq_cal": list (11 int, 0-42),
+		"baseq_raw": list (11 int, 0-42),
 		"read_nt": list (11 int, 0-3),
-		"uniq_24": list (12 float, 0-1, 1=uniq),
+		"uniq_24": list (12 float, 0-1, 1=uniq, 12=36-24),
 		"map_pos": int (genome position),
 		"mapq": int (0-42),
 		"nsnp": int (1-2),
