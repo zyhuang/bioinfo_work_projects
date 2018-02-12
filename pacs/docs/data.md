@@ -1,11 +1,42 @@
 This files documents the format of intermediate data in PACS.
 
-### variant calling output `data2:var_json`:
+### variant calling output 
+
+* data location: `data2/pacs/var_json/batch_[BID]/[SID].var.json.gz`, (`BID` = `00..21`). 
+* number of files: `214277`.
+* content: Random Forest variant classification result, one file per sample, one variant per line (). 
+* column 1: variant key, format = `chrom:pos:ref:alt` (`pos` is a 9-digit number with 0-prefix). 
+* column 2: variant features (in JSON format)
 
 ```Javascript
-1:000150570:C:T    {"anno": {"af_1000g_all": 0.0, "af_1000g_eas": 0.0, "af_exac_adj": -1, "af_exac_all": -1, "af_exac_eas": -1, "in_dbsnp": 0,
-"in_exac_target": 0}, "predict": {"pred": 0, "prob": 0.00273065364294497}, "read": {"baseq_baq": [0, 0, 0, 0, 5, 7, 2, 0, 0, 0, 1], "baseq_c
-al": [34, 35, 35, 33, 34, 33, 31, 31, 32, 31, 32], "baseq_raw": [40, 41, 41, 41, 41, 38, 40, 41, 41, 41, 41], "map_pos": 150540, "mapq": 37,
- "nsnp": 1, "offset": 30, "read_id": "1201:6831:97567", "read_nt": [4, 3, 2, 2, 4, 4, 4, 2, 1, 1, 1], "rev_comp": 0, "sample_id": "AB0855ABX
-X015", "uniq_24": [0.06, 0.06, 1.0, 1.0, 0.5, 0.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0]}}
+{
+	"anno": {
+		"af_1000g_all": float (0-1),
+		"af_1000g_eas": float (0-1),
+		"af_exac_all": float (0-1 or -1),
+		"af_exac_adj": float (0-1 or -1),
+		"af_exac_eas": float (0-1 or -1),
+		"in_dbsnp": int (0/1),
+		"in_exac_target": int (0/1),
+	},
+	"predict": {
+		"pred": int (0/1),
+		"prob": float (0-1),
+	}
+	"read": {
+		"baseq_baq": list (11 int, 0-),
+		"baseq_cal": list (11 int, 0-40),
+		"baseq_raw": list (11 int, 0-40),
+		"read_nt": list (11 int, 0-3),
+		"uniq_24": list (12 float, 0-1, 1=uniq),
+		"map_pos": int (genome position),
+		"mapq": int (0-42),
+		"nsnp": int (1-2),
+		"offset": int (0-31),
+		"read_id": str ("tile_id:cluster_x:cluster_y"),
+		"rev_comp": int (0/1), 
+		"sample_id": str, 
+	}
+
+}
 ```
