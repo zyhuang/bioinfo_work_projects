@@ -79,12 +79,12 @@ This file documents the format of intermediate data in PACS.
 			"index": int (0-999, index in AF search list),
 			"prob": float (0-1),
 		},
-		"mean": {
+		"median": {
 			"af": float (0-1, median),
 			"index": int (0-999, index in AF search list),
 			"prob": float (0-1),
 		},
-		"mean": {
+		"mode": {
 			"af": float (0-1, mode),
 			"index": int (0-999, index in AF search list),
 			"prob": float (0-1),
