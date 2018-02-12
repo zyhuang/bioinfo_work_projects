@@ -8,7 +8,7 @@ This files documents the format of intermediate data in PACS.
 * column 1: variant key, format = `chrom:pos:ref:alt` (`pos` is a 9-digit number with 0-prefix). 
 * column 2: variant features (in JSON format)
 
-```json
+```javascript
 {
 	"anno": {
 		"af_1000g_all": float (0-1),
