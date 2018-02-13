@@ -14,7 +14,10 @@ json_name = sys.argv[1]
 if len(sys.argv) == 3:
     field = sys.argv[2]
 
-data = load_json(json_name)
+if json_name != '-':
+    data = load_json(json_name)
+else:
+    data = json.loads(sys.stdin.readline())
 
 if not field:
 
