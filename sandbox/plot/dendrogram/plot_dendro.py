@@ -31,7 +31,7 @@ def proc_data(data_file_name, data_label_name):
     return data_matrix, data_label
 
 
-def plot_data(data_matrix, data_label, out_pdf_name):
+def plot_data(data_matrix, data_label, out_pdf_name, out_order_name):
 
     font_size = 7
     matplotlib.rcParams.update({'font.size': font_size})
@@ -41,18 +41,23 @@ def plot_data(data_matrix, data_label, out_pdf_name):
     distVec = squareform(data_matrix)
     max_dist = (1-max(distVec)) * 1.1
     mylinkage = linkage(distVec, 'ward')
-    dendrogram(mylinkage, labels=data_label, leaf_font_size=font_size,
+    r = dendrogram(mylinkage, labels=data_label, leaf_font_size=font_size,
                leaf_rotation=90)
+
+    fout = open(out_order_name, 'w')
+    for x in r['ivl']:
+        print(x, file=fout)
+    fout.close()
 
     plt.savefig(out_pdf_name, bbox_inches='tight')
 
 
 def plot_dendro():
 
-    data_file_name, data_label_name, out_pdf_name = sys.argv[1:4]
+    data_file_name, data_label_name, out_pdf_name, out_order_name = sys.argv[1:5]
 
     data_matrix, data_label = proc_data(data_file_name, data_label_name)
-    plot_data(data_matrix, data_label, out_pdf_name)
+    plot_data(data_matrix, data_label, out_pdf_name, out_order_name)
 
 
 if __name__ == '__main__':
