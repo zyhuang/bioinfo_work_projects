@@ -25,8 +25,8 @@ def proc_data(data_file_name, data_label_name):
             continue
         idx1 = label_index[item1]
         idx2 = label_index[item2]
-        data_matrix[idx1][idx2] = 1 - dist
-        data_matrix[idx2][idx1] = 1 - dist
+        data_matrix[idx1][idx2] = dist
+        data_matrix[idx2][idx1] = dist
 
     return data_matrix, data_label
 
