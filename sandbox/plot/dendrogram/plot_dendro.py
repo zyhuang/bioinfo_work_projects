@@ -40,7 +40,7 @@ def plot_data(data_matrix, data_label, out_pdf_name, out_order_name):
 
     distVec = squareform(data_matrix)
     max_dist = (1-max(distVec)) * 1.1
-    mylinkage = linkage(distVec, 'ward')
+    mylinkage = linkage(distVec, 'ward', optimal_ordering=True)
     r = dendrogram(mylinkage, labels=data_label, leaf_font_size=font_size,
                leaf_rotation=90)
 
