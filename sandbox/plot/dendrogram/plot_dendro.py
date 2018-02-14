@@ -10,6 +10,8 @@ def proc_data(data_file_name, data_label_name):
 
     data_label = []
     for line in open(data_label_name):
+        if line.startswith('#'):
+            continue
         data_label.append(line.rstrip())
 
     nitem = len(data_label)
