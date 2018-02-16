@@ -7,7 +7,8 @@
 * `exonic` / `splicing` / both (=> see `ExonicFunc.refGene`)
 * `ncRNA_exonic` / `ncRNA_splicing` / both 
 * `UTR5` / `UTR3` / both 
-* `intronic` (and `ncRNA_intronic`)
+* `intronic`
+* `ncRNA_intronic`
 * `upstream` / `downstream` / both 
 * `intergenic`
 
