@@ -2,7 +2,7 @@
 
 [Reference](http://annovar.openbioinformatics.org/en/latest/user-guide/gene/)
 
-`Func.refGene` values in order of descending precedence (similar for `Func.wgEncodeGencodeBasicV19`). In case of "both", the values are separated by `\x3b` (`;`).
+`Func.refGene` values in order of descending precedence (similar for `Func.wgEncodeGencodeBasicV19`). In case of "both", the values are separated by `\x3b` (`;`)
 
 * `exonic` / `splicing` / both (=> see `ExonicFunc.refGene`)
 * `ncRNA_exonic` / `ncRNA_splicing` / both 
@@ -12,7 +12,7 @@
 * `upstream` / `downstream` / both 
 * `intergenic`
 
-`ExonicFunc.refGene` values in order of descending precedence (similar for `ExonicFunc.wgEncodeGencodeBasicV19`).
+When `Func.refGene` contains `exonic`, `ExonicFunc.refGene` values in order of descending precedence (similar for `ExonicFunc.wgEncodeGencodeBasicV19`)
 
 * `frameshift_insertion`
 * `frameshift_deletion`
