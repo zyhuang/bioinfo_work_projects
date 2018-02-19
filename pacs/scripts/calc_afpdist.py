@@ -71,7 +71,10 @@ def calc_pdist(vardata):
             if vardata[p1]['ns_all'] <= 0 or vardata[p2]['ns_all'] <= 0:
                 continue
             key = '{}:{}'.format(p1, p2)
-            pdist_dict[key] = vardata[p1]['af_mle'] - vardata[p2]['af_mle']
+            df = vardata[p1]['af_mle'] - vardata[p2]['af_mle']
+            pdist_dict[key] = {
+                'n': 1 , 'df': df, 'df2': df*df,
+            }
 
     return pdist_dict
 
