@@ -28,8 +28,8 @@ def get_anno_keys(vardata):
     '''
 
     rename_rule = {
-        'exonic\x3bsplicing': ['exonic', 'splicing'],
-        'ncRNA_exonic\x3bsplicing': ['ncRNA_exonic', 'ncRNA_splicing'],
+        'exonic\\x3bsplicing': ['exonic', 'splicing'],
+        'ncRNA_exonic\\x3bsplicing': ['ncRNA_exonic', 'ncRNA_splicing'],
         'UTR5': ['UTR5/UTR3'],
         'UTR3': ['UTR5/UTR3'],
         'UTR5\\x3bUTR3': ['UTR5/UTR3'],
