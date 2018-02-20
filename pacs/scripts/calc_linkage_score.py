@@ -68,8 +68,11 @@ def get_pairs(pdist_dict):
     return prov_pair, prov_list
 
 
-def calc_linkage_score(pdist_list_name):
+def calc_linkage_score(pdist_list_name, out_linkage_name):
 
+    print('reading ' + pdist_list_name)
+    print('writing ' + out_linkage_name)
+    fout = open(out_linkage_name, 'w')
     for line in open(pdist_list_name):
         key, data = line.rstrip().split('\t')
         data = json.loads(data)
@@ -105,7 +108,12 @@ def calc_linkage_score(pdist_list_name):
             'linkage_out': linkage_out,
         }
 
-        print(key, json.dumps(out_dict, sort_keys=True), sep='\t')
+        print(key, json.dumps(out_dict, sort_keys=True), sep='\t', file=fout)
+
+    fout.close()
 
 
-calc_linkage_score(sys.argv[1])
+if __name__ == '__main__':
+
+    pdist_list_name, out_linkage_name = sys.argv[1:3]
+    calc_linkage_score(pdist_list_name, out_linkage_name)
