@@ -58,13 +58,27 @@ def get_pairs(pdist_dict):
         # print(n, n*(n-1)/2, m)
         if m == (n-1)*n/2:
             break
+
+        # drop prov with min pair-wise distance
         prov_min = sorted(prov_count.items(), key=lambda x:x[1])[0][0]
-        # print('pop prov_min {}: {}'.format(prov_count[prov_min]))
+
+        # print('pop prov_min {}: {}'.format(prov_min, prov_count[prov_min]))
         prov_count.pop(prov_min)
-        prov_pair = prov_count_to_prov_pair(prov_count)
+
+        # drop prov in prov_pair
+        new_prov_pair = []
+        for pair in prov_pair:
+            p1, p2 = pair.split(':')
+            if p1 == prov_min or p2 == prov_min:
+                continue
+            new_prov_pair.append(pair)
+        prov_pair = new_prov_pair
+
 
     prov_list = sorted(prov_count.keys())
     prov_pair = prov_count_to_prov_pair(prov_count)
+    # print(prov_list)
+
     return prov_pair, prov_list
 
 
