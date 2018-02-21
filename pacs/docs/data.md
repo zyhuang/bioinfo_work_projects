@@ -114,10 +114,32 @@ This file documents the format of intermediate data in PACS.
 ### bam index (bai)
 
 * data location: `data1/pacs/idx_stat/batch.[BID]/[SID].idxstats.gz` (Batch ID `BID`=`00..21`, `SID` is sample ID). 
-* data size: 25MB
+* data size: 862MB
 * number of files: 214277 (1 per sample, 10000 per batch)
-* content: number of reads mapped to chr1-22, X, Y, MT (generated using `samtools idxstats [SID].bam`)
+* content: number of reads mapped to chr1-22, X, Y, MT (25 rows) (generated using `samtools idxstats [SID].bam`)
 * columns (tab-separated): `chrom`, `length`, `#reads`, `#reads unmapped`(0).
+
+
+### read position data
+
+* data location: `data1/pacs/read_pos/batch.[BID]/[SID].rpos.list.gz` (Batch ID `BID`=`00..21`, `SID` is sample ID). 
+* data size: 2.5TB
+* number of files: 214277 (1 per sample, 10000 per batch)
+* content: read mapping position on chr1-22, X, Y (24 rows). Reads containing FP variants were already filtered. 
+* column 1: chromosome name
+* column 2: comma-separated read map positions (e.g. `715376,724291,747675,750992,...`), as in column 4 of bam.
+
+
+### reference allele reads
+
+* data location: `data1/pacs/ref_read/batch.[BID]/[SID].ref.keep.list.gz` (Batch ID `BID`=`00..21`, `SID` is sample ID). 
+* data size: 1.3TB
+* number of files: 214277 (1 per sample, 10000 per batch)
+* content: in each sample level BAM file, the base quality of each reference read at 25 million union variant sites (if covered). Reads containing FP variants were already filtered. 
+* column 1: position key `chrom:pos(9):ref(1)`
+* column 2: base quality of reference allele (e.g. `FGE`), Phred-score coded in ASCII. 
+
+
 
 
 
