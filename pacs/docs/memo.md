@@ -12,6 +12,7 @@
 * `upstream` / `downstream` / both 
 * `intergenic`
 
+
 When `Func.refGene` contains `exonic`, `ExonicFunc.refGene` values in order of descending precedence (similar for `ExonicFunc.wgEncodeGencodeBasicV19`)
 
 * `frameshift_insertion`
@@ -26,5 +27,10 @@ When `Func.refGene` contains `exonic`, `ExonicFunc.refGene` values in order of d
 * `synonymous_SNV`
 * `unknown`
 
+
+### path to denisova and neathertal data
+
+* [http://cdna.eva.mpg.de/denisova/VCF/hg19_1000g/](http://cdna.eva.mpg.de/denisova/VCF/hg19_1000g/)
+* [http://cdna.eva.mpg.de/neandertal/altai](http://cdna.eva.mpg.de/neandertal/altai)
 
 
