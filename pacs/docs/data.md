@@ -6,7 +6,7 @@ This file documents the format of intermediate data in PACS.
 * data size: 4.7TB. 
 * number of files: 214277 (1 per sample, 10000 per batch).
 * content: Random Forest variant classification result, one file per sample, one variant per line (variable number of variants per sample). 
-* column 1: variant key `chrom:pos:ref:alt` (`pos` is a 9-digit number with 0-prefix). 
+* column 1: variant key `chrom:pos(09d):ref:alt`.
 * column 2: variant features (in JSON format)
 
 ```javascript
@@ -47,7 +47,7 @@ This file documents the format of intermediate data in PACS.
 * data size: 15.6TB.
 * number of files: 51597 files per province (5733 bins, 9 sub-bins per bin). The number of variants per sub-bin is 500, except for the last bin (5733).  
 * content: Bayesian allele frequency estimation result, one file per sub-bin, one variant per line. 
-* column 1: variant key `chrom:pos:ref:alt` (`pos` is a 9-digit number with 0-prefix). 
+* column 1: variant key `chrom:pos:ref(09d):alt`.
 * column 2: variant features (in JSON format)
 
 ```javascript
@@ -136,7 +136,7 @@ This file documents the format of intermediate data in PACS.
 * data size: 1.3TB
 * number of files: 214277 (1 per sample, 10000 per batch)
 * content: in each sample level BAM file, the base quality of each reference read at 25 million union variant sites (if covered). Reads containing FP variants were already filtered. 
-* column 1: position key `chrom:pos(9):ref(1)`
+* column 1: position key `chrom:pos(09d):ref(1s)`
 * column 2: Phred-score base quality of reference allele (e.g. `FGE`), `Q = ord(C)-33`. The number of character is the number of reads of reference allele. 
 
 ### varaint allele reads
@@ -145,13 +145,31 @@ This file documents the format of intermediate data in PACS.
 * data size: 116GB
 * number of files: 214277 (1 per sample, 10000 per batch)
 * content: in each sample level BAM file, the variant allele reads after Random Forest classiciation.
-* column 1: position key `chrom:pos(9):ref(1)`
+* column 1: position key `chrom:pos(09d):ref(1s)`
 * column 2: the reads of variant allele(s) after Random Forest classification (e.g. `AAA`). The number of character is the number of reads of variant allele(s).
 
 ### site quality data
 
-* data location: `data1/pacs/site_qual/batch.[BID]/[SID].var.keep.list.gz` (Batch ID `BID`=`00..21`, `SID` is sample ID). 
-* data size: 116GB 
+* data location: `data1/pacs/site_qual/merge1/[BID]/qual_union.[PSTART].[PEND].json.gz` (e.g. `merge1/1.120/qual_union.160001.160100.json.gz`). `BID` is the ID of 1mbp bin in format of `chorm.pos(03d)` and `PSTART`/`PEND` are 1-based start/end position of 100bp sub-bins within the 1mbp bin, in format of `pos(06d)`. 
+* data size: 283GB.
+* number of files: 2911 1mbp bins, each with a number of 100bp sub-bins (6,227,523 sub-bins in total)
+* content: for each variant, the number of variant reads and variant quality (`P_error`) globally (`All`) and in any provinces with variants. The number of provinces are variable.
+* column 1: variant key `chrom:pos(09d):ref:alt`.
+* column 2: variant features (in JSON format)
+
+```javascript
+{
+	"All": {
+		"err": float (0-1, error probability),
+		"nread": int (1-, number of variant reads),
+	},
+	"[PROV1]": {"err": prob, "nread": nread}, 
+	"[PROV2]": {"err": prob, "nread": nread}, 
+	...
+}
+```
+
+
 
 
 
