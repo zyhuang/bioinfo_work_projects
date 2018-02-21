@@ -130,15 +130,28 @@ This file documents the format of intermediate data in PACS.
 * column 2: comma-separated read map positions (e.g. `715376,724291,747675,750992,...`), as in column 4 of bam.
 
 
-### reference allele reads
+### reference allele reads and base quality
 
 * data location: `data1/pacs/ref_read/batch.[BID]/[SID].ref.keep.list.gz` (Batch ID `BID`=`00..21`, `SID` is sample ID). 
 * data size: 1.3TB
 * number of files: 214277 (1 per sample, 10000 per batch)
 * content: in each sample level BAM file, the base quality of each reference read at 25 million union variant sites (if covered). Reads containing FP variants were already filtered. 
 * column 1: position key `chrom:pos(9):ref(1)`
-* column 2: base quality of reference allele (e.g. `FGE`), Phred-score coded in ASCII. 
+* column 2: Phred-score base quality of reference allele (e.g. `FGE`), `Q = ord(C)-33`. The number of character is the number of reads of reference allele. 
 
+### varaint allele reads
+
+* data location: `data1/pacs/var_read/batch.[BID]/[SID].var.keep.list.gz` (Batch ID `BID`=`00..21`, `SID` is sample ID). 
+* data size: 116GB
+* number of files: 214277 (1 per sample, 10000 per batch)
+* content: in each sample level BAM file, the variant allele reads after Random Forest classiciation.
+* column 1: position key `chrom:pos(9):ref(1)`
+* column 2: the reads of variant allele(s) after Random Forest classification (e.g. `AAA`). The number of character is the number of reads of variant allele(s).
+
+### site quality data
+
+* data location: `data1/pacs/site_qual/batch.[BID]/[SID].var.keep.list.gz` (Batch ID `BID`=`00..21`, `SID` is sample ID). 
+* data size: 116GB 
 
 
 
