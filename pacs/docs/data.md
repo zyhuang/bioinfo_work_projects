@@ -111,6 +111,14 @@ This file documents the format of intermediate data in PACS.
 	},
 }
 ```
+### bam index (bai)
+
+* data location: `data1/pacs/bai_stat/batch.[BID]/[SID].idxstats.gz` (Batch ID `BID`=`00..21`, `SID` is sample ID). 
+* data size: 25MB
+* number of files: 214277 (1 per sample, 10000 per batch)
+* content: number of reads mapped to chr1-22, X, Y, MT (generated using `samtools idxstats [SID].bam`)
+* columns (tab-separated): `chrom`, `length`, `#reads`, `#reads unmapped (==0)`.
+
 
 
 
