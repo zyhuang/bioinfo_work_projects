@@ -24,7 +24,7 @@ istart=$[(PBS_ARRAYID-1)*incr+1]
 iend=$[PBS_ARRAYID*incr]
 
 for path in $(awk 'NR>='$istart' && NR<='$iend'' path.list); do
-    find $path -type f | xargs -n1 -P1 du -s | grep ^0
+    find $path -type f | sed 's| |\\ |g' | xargs -n1 -P1 du -s | grep ^0
 done
 
 
