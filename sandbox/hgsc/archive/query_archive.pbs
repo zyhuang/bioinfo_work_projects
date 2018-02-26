@@ -1,0 +1,77 @@
+#!/bin/bash
+
+#PBS -q scavenger
+#PBS -A scavenger
+#PBS -o log
+#PBS -V
+#PBS -j oe
+#PBS -N query_archive
+#PBS -l nodes=1:ppn=1,mem=5G
+#PBS -t 1-11
+
+#-q analysis
+#-A proj-fy0006
+#-l walltime=13:00:00:00
+
+cd $PBS_O_WORKDIR
+
+# PBS_ARRAYID
+
+t1=$(date +%s)
+
+incr=1
+istart=$[(PBS_ARRAYID-1)*incr+1]
+iend=$[PBS_ARRAYID*incr]
+
+
+function get_todo() {
+    echo "find -L $archive_dir -type f | sort > target.wlink.list"
+    find -L $archive_dir -type f | sort > target.wlink.list
+
+    echo "find $archive_dir -type l | sort | uniq > links.list"
+    find $archive_dir -type l | sort | uniq > links.list
+
+    # remove linked dirs
+    cp target.wlink.list a
+    for dir in $(cat links.list); do
+        grep -v ^$dir/ a > b
+        mv b a
+    done
+    sort a | uniq > target.list
+    rm a 
+}
+
+function check_archive () {
+    echo "/$(echo $archive_dir | cut -d\/ -f3-)/*" > query.list
+    echo "search.pl -o -f query.list"
+    search.pl -o -f query.list
+    rm query.list
+    wc -l query.list*
+}
+
+function check_difference () {
+    cat target.list | sed 's/ /_/g' | sort | uniq > cf.target.list
+    cat query.list.out | sed 's/ /_/g' | cut -d\/ -f6- | awk '{print "/stornext/"$0}' | sort | uniq > cf.done.list
+    join -v1 cf.target.list cf.done.list > cf.todo.list
+    join -v1 cf.done.list cf.target.list > cf.overdone.list
+    wc -l cf.todo.list cf.overdone.list
+}
+
+
+here=$(pwd -P)
+for path in $(cat path.list | awk 'NR>='$istart' && NR<='$iend''); do
+    dir=$(echo $path | sed 's|/|_|g;s|^_||g')
+    echo mkdir -p $dir
+    mkdir -p $dir
+    cd $dir
+    get_todo
+    check_archive
+    check_difference
+    cd $here
+done
+
+
+
+t2=$(date +%s)
+dt=$[t2-t1]
+echo "% Job $PBS_ARRAYID is done in $(date -ud @$dt +%j:%T | awk -F\: '{printf("%03d:%02d:%02d:%02d\n",$1-1,$2,$3,$4)}')"
