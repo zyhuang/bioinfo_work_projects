@@ -39,7 +39,7 @@ def query(time_stamp, path, sub_level=0):
         data = line.rstrip().split()
         if len(data) != 2:
             continue
-        if path not in data[1]:
+        if not path + '/' in data[1] and data[1] != path:
             continue
         level = len(data[1].split('/'))
         if level == dir_level:
