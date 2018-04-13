@@ -1,6 +1,7 @@
 import sys
 import json
 import os
+import re
 
 
 def make_bin_key(var_key):
@@ -21,12 +22,13 @@ def split_dbsnp_bin(json_name, out_dir):
 
     fout_dict = {}
 
+    chrom = re.findall(r'refsnp-chr(.*?).json', json_name)[0]
     print('reading ' + json_name, file=sys.stderr)
     for line in open(json_name):
         line = line.rstrip()
         var_key, value = line.split('\t')
         bin_key = make_bin_key(var_key)
-        out_json_name = '{}/{}.dbsnp.json'.format(out_dir, bin_key)
+        out_json_name = '{}/{}.dbsnp.from.{}.json'.format(out_dir, bin_key, chrom)
         if out_json_name not in fout_dict:
             fout_dict[out_json_name] = open(out_json_name, 'w')
         print(line, file=fout_dict[out_json_name])
