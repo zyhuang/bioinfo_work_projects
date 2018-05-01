@@ -1,0 +1,3 @@
+calc_popaf_1000g.py:
+1. remove duplicates
+2. add gender information especially for chrX
