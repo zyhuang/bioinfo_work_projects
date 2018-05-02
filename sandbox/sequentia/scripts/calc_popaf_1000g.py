@@ -38,6 +38,9 @@ def load_sample_header(vcf_line, panel_name):
 
 
 def load_gt_stat(vcf_data, sample_header_hash):
+    '''
+    return gt_stat = {'ALL': {"0/1": cnt, "0/0": cnt, ...}, "EAS": {...}, ...}
+    '''
 
     gt_stat = {}
     for i, gt in enumerate(vcf_data):
@@ -57,27 +60,43 @@ def load_gt_stat(vcf_data, sample_header_hash):
 
 
 def calc_alt_freq(gt_stat, alt_index):
+    '''
+    alt_index is 0-based in the alt list, alt = 0 is the 1 of "1/2" in genotype
+    return af_stat = {'ALL': {'ns': ns, 'af': af, 'ns1': ns_male, 'af1': af_male,
+                      'ns2': ns_female, 'af2': af_female, ...}, 'EAS': {...}, ...}
+    '''
 
     af_stat = {}
-    for pop,gt_dict in gt_stat.items():
-        an = 0
-        ac = 0
-        for gt,count in gt_dict.items():
-            if '|' in gt:
-                # diploid
-                an += count*2
+    for pop, gt_dict in gt_stat.items():
+        ns1 = 0   # 1 chromosome
+        ac1 = 0
+        ns2 = 0   # 2 chromosomes
+        ac2 = 0
+        for gt, count in gt_dict.items():
+            # two chromosomes
+            if '|' in gt:  # | for phased genotype in 1000G
+                ns2 += count
                 if gt == '{}|{}'.format(alt_index+1, alt_index+1):
-                    ac += count*2
+                    ac2 += count*2
                 elif (gt.startswith('{}|'.format(alt_index+1)) or
                       gt.endswith('|{}'.format(alt_index+1))):
-                    ac += count
+                    ac2 += count
+            # one chromosome
             else:
-                 # haploid (male)
-                 an += count
+                 ns1 += count
                  if gt == '{}'.format(alt_index+1):
-                     ac += count
+                     ac1 += count
 
-        af_stat[pop] = ac/an
+        ns = ns1 + ns2
+        af1 = ac1 / ns1 if ns1 else None
+        af2 = ac2 / (2*ns2) if ns2 else None
+        af = (ac1 + ac2) / (ns1 + 2*ns2) if (ns1 + 2*ns2) else None
+
+        af_stat[pop] = {
+            'af': af, 'ns': ns,
+            'af1': af1, 'ns1': ns1,
+            'af2': af2, 'ns2': ns2,
+        }
 
     return af_stat
 
@@ -106,6 +125,7 @@ def subpop_af(vcf_name, panel_name, refgen_name, out_list_name,
 
     refgen_fa = fasta.Fasta(refgen_name)
     fout = open(out_list_name, 'w')
+    varkey_set = set()
 
     if region_str:
         cmd = 'tabix -h {} {}'.format(vcf_name, region_str)
@@ -129,10 +149,9 @@ def subpop_af(vcf_name, panel_name, refgen_name, out_list_name,
 
         chrom, pos, rsids, ref, alts = vcf_data[:5]
         alt_list = alts.split(',')
-        rsid_list = rsids.split(';')
-        if len(alt_list) != len(rsid_list):
-            rsid_list = [rsids for alt in alt_list]
-
+        # rsid_list = rsids.split(';')
+        # if len(alt_list) != len(rsid_list):
+        #     rsid_list = [rsids for alt in alt_list]
 
         # ----- debug -----
         # if not vcf_data[4].startswith('<'):
@@ -159,8 +178,12 @@ def subpop_af(vcf_name, panel_name, refgen_name, out_list_name,
             if not gt_stat:
                 gt_stat = load_gt_stat(vcf_data, sample_header_hash)
             af_stat = calc_alt_freq(gt_stat, i)
-            print(varkey, rsid_list[i], json.dumps(af_stat, sort_keys=True),
-                  sep='\t', file=fout)
+
+            # to prevent duplicated variants (appearing on chr8, 12, 14 and X)
+            if varkey not in varkey_set:
+                print(varkey, json.dumps(af_stat, sort_keys=True),
+                      sep='\t', file=fout)
+                varkey_set.add(varkey)
 
             # ----- debug -----
             # print(vcf_data[:8])
@@ -169,9 +192,10 @@ def subpop_af(vcf_name, panel_name, refgen_name, out_list_name,
             # print(gt_stat)
             # print()
 
+            # debugging print, check if the calculated AF the same as those in INFO
             for p in ['AFR', 'AMR', 'EUR', 'EAS', 'SAS', 'ALL']:
                 q = p+'_AF' if p != 'ALL' else 'AF'
-                if abs(af_stat[p] - info_af[q][i]) > 1e-3:
+                if abs(af_stat[p]['af'] - info_af[q][i]) > 1e-3:
                     print(vcf_data[:8], file=sys.stderr)
                     print(p, q, af_stat[p], info_af[q][i], file=sys.stderr)
                     print(varkey, file=sys.stderr)
